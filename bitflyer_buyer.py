@@ -17,13 +17,19 @@ def lambda_handler(event, context):
     logger.setLevel(logging.INFO)
     
     credencials = get_credencials()
-    
     api = pybitflyer.API(api_key = credencials.key, api_secret = credencials.secret)
+
+    response = api.ticker(product_code="BTC_JPY")
+    price = response['best_bid']
+
+    size = round(float(os.environ["BITFLYER_PURCHASE_SIZE_IN_JPY"]) / price, 3)
+    logger.info("purchase_size: " + str(size))
+
     response = api.sendchildorder(
       product_code = "BTC_JPY",
       child_order_type = "MARKET",
       side = "BUY",
-      size = 0.05
+      size = size
     )
 
     logger.info(response)
